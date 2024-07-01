@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="Images">
+    <file>images/accept.png</file>
+    <file>images/kek.png</file>
+    <file>images/sf123.jpg</file>
+    <file>images/true_ghoul.png</file>
+  </qresource>
+</RCC>
