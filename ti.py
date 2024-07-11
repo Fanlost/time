@@ -9,11 +9,14 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QSystemTrayIcon, QStyle, QAction, QMenu
 from random import randint
-import os
-import time
+import os, asyncio
+import time as t
 
+stop = False
 class Ui_MainWindow(object):
+
     def picture():
         x = randint(len(os.listdir("C:\\Project_Python\\time\\images")))
         print(os.listdir("C:\\Project_Python\\time\\images"))
@@ -32,7 +35,6 @@ class Ui_MainWindow(object):
         self.pushButton.setStyleSheet("background-image: url(:/Images/images/accept.png);")
         self.pushButton.setText("")
         self.pushButton.setObjectName("pushButton")
-        self.pushButton.clicked.connect(self.accept)
         self.timeEdit = QtWidgets.QTimeEdit(self.centralwidget)
         self.timeEdit.setGeometry(QtCore.QRect(530, 380, 201, 101))
         self.timeEdit.setObjectName("timeEdit")
@@ -44,36 +46,121 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-
+        self.pushButton.clicked.connect(self.accept)
+        # msg_box_name
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+    def time(self, minutes, hourses, loop):
+        print(hourses, minutes)
+        global stop
+        if hourses == 0:
+            self.hide()
+            MainWindow.show_message(self, minutes, hourses)
+            n = 0
+            while n <= minutes*60:
+                if not stop:
+                    t.sleep(1)
+                    print(n)
+                    n+=1
+                else:
+                    print("Цикл остановлен")
+                    loop.close()
+                    break
+            if stop == False:
+                print("Таймер вышел!")
+                os.system("shutdown -s")
+            else:
+                stop = False
+        elif hourses > 0:
+            print(1)
+            self.hide()
+            MainWindow.show_message(self, minutes, hourses)
+            n = 0
+            while n <= hourses*60*60+minutes*60:
+                if not stop:
+                    t.sleep(1)
+                    print(n)
+                    n+=1
+                else:
+                    print("Цикл остановлен")
+                    loop.close()
+                    break
+            if stop == False:
+                print("Таймер вышел!")
+                os.system("shutdown -s")
+            else:
+                stop = False
+            # t.sleep(hourses*60*60+minutes*60)
+            os.system("shutdown -s")
+    def connector(self, minutes, hours):
+        loop = asyncio.new_event_loop()
+        loop.run_until_complete(self.time(minutes=minutes, hourses=hours, loop=loop))
     def accept(self):
+        import threading
         hours = self.timeEdit.time().hour()
         minutes = self.timeEdit.time().minute()
-        if hours == 0:
-            time.sleep(minutes*60)
-            os.system("shutdown -s")
-        elif hours is int and hours > 0:
-            time.sleep(hours*60*60+minutes*60)
-            os.system("shutdown -s")
-        print(self.timeEdit.time().hour())
+        print(hours, type(minutes))
+        t = threading.Thread(target=self.connector, args=(minutes, hours, ))
+        t.start()
+        # asyncio.create_task()
+        # print(self.timeEdit.time().hour())
+    # def connect(self):
+    #     asyncio.run(self.accept())
+    def stop_():
+        global stop
+        stop = True
 import image_rc
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
-    def __init__(self):                 
+    tray_icon = None
+    checkbox = None
+    def __init__(self):
         super().__init__()
-        
+        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setIcon(
+        self.style().standardIcon(QStyle.SP_ComputerIcon))
+        show_action = QAction("Показать", self)
+        stop_loop = QAction("Остановить", self)
+        show_action.triggered.connect(self.show)
+        stop_loop.triggered.connect(Ui_MainWindow.stop_)
+        tray_menu = QMenu()
+        tray_menu.addAction(show_action)
+        tray_menu.addAction(stop_loop)
+        self.tray_icon.setContextMenu(tray_menu)
+        self.tray_icon.show()
         self.setupUi(self)
+    def show_message(self, minutes, hours):
+        if hours == 0:
+            self.tray_icon.showMessage(
+                "Time",
+                f"Поставлен таймер на {minutes} минут",
+                QSystemTrayIcon.Information,
+                2000
+            )
+        elif hours>0:
+            self.tray_icon.showMessage(
+                "Time",
+                f"Поставлен таймер на {hours} час(ов) и {minutes} минут",
+                QSystemTrayIcon.Information,
+                2000
+            )
+
+
 
 if __name__ == '__main__':
     import sys
+    import pkg_resources
+    import httpx
+    # installed_v = pkg_resources.get_distribution("sfmanager").version
+    v = httpx.get("https://github.com/Fanlost/time")
+    print(v)
     app = QtWidgets.QApplication(sys.argv)
     p = MainWindow()
     p.show()
+    # print(asyncio.run(app.exec_()))
     sys.exit(app.exec_())
 import image_rc

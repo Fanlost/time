@@ -1,1 +1,2 @@
-self.timeEdit
+
+            await self.hide()
