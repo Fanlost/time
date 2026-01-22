@@ -14,6 +14,7 @@ from random import randint
 import os, asyncio
 import time as t
 
+
 stop = False
 class Ui_MainWindow(object):
 
@@ -47,13 +48,28 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         self.pushButton.clicked.connect(self.accept)
-        # msg_box_name
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+    # def final(self, dialog):
+    #     print(dialog.text())
+    #     # if dialog == No or dialog == None:
+    # def show_msg(self, time=5):
+    #     self.msg = QtWidgets.QMessageBox() 
+    #     self.msg.setIcon(QtWidgets.QMessageBox.Question)
+    #     self.msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+    #     # while time>1:
+    #     self.msg.setText(f"Комьпьютер выключиться через {time}\n Нажмите 'Cancel' чтобы отменить")
+    #         # time-1
+    #     self.msg.exec_()
+    #     self.msg.buttonClicked.connect(self.final)
+        
+
+
+
     def time(self, minutes, hourses, loop):
         print(hourses, minutes)
         global stop
@@ -72,6 +88,9 @@ class Ui_MainWindow(object):
                     break
             if stop == False:
                 print("Таймер вышел!")
+                # self.show_msg()
+                # if self.msg == QtWidgets.QMessageBox.No:
+                print(12)
                 os.system("shutdown -s")
             else:
                 stop = False
@@ -91,11 +110,15 @@ class Ui_MainWindow(object):
                     break
             if stop == False:
                 print("Таймер вышел!")
+                self.show_msg()
+                print(12)
+                # if self.msg == QtWidgets.QMessageBox.No
                 os.system("shutdown -s")
+                # os.system("shutdown -s")
             else:
                 stop = False
             # t.sleep(hourses*60*60+minutes*60)
-            os.system("shutdown -s")
+            # os.system("shutdown -s")
     def connector(self, minutes, hours):
         loop = asyncio.new_event_loop()
         loop.run_until_complete(self.time(minutes=minutes, hourses=hours, loop=loop))
@@ -113,6 +136,7 @@ class Ui_MainWindow(object):
     def stop_():
         global stop
         stop = True
+
 import image_rc
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -125,14 +149,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.style().standardIcon(QStyle.SP_ComputerIcon))
         show_action = QAction("Показать", self)
         stop_loop = QAction("Остановить", self)
+        close_action = QAction("Закрыть", self)
         show_action.triggered.connect(self.show)
         stop_loop.triggered.connect(Ui_MainWindow.stop_)
+        close_action.triggered.connect(self.close)
         tray_menu = QMenu()
         tray_menu.addAction(show_action)
         tray_menu.addAction(stop_loop)
+        tray_menu.addAction(close_action)
         self.tray_icon.setContextMenu(tray_menu)
         self.tray_icon.show()
         self.setupUi(self)
+    def close(self):
+        exit()
     def show_message(self, minutes, hours):
         if hours == 0:
             self.tray_icon.showMessage(
@@ -150,14 +179,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             )
 
 
-
 if __name__ == '__main__':
     import sys
-    import pkg_resources
-    import httpx
+    # import pkg_resources
+    # import httpx
+    import requests
     # installed_v = pkg_resources.get_distribution("sfmanager").version
-    v = httpx.get("https://github.com/Fanlost/time")
-    print(v)
+    # v = httpx.get("https://github.com/Fanlost/time/blob/main/version")
+    # f = requests.get("https://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@raw.githubusercontent.com/Fanlost/time/main/version.txt")
+    # with open("info.txt", "w") as file:
+    #     file.write(f.text)
     app = QtWidgets.QApplication(sys.argv)
     p = MainWindow()
     p.show()

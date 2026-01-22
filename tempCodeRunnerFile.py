@@ -1,2 +1,1 @@
 
-            await self.hide()
